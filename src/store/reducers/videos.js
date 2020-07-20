@@ -149,3 +149,7 @@ export const getVideosByCategory = createSelector(
 		}, {});
 	}
 );
+
+export const getVideoById = (state, videoId) => {
+	return state.videos.byId[videoId];
+};
