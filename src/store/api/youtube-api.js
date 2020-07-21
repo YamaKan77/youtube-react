@@ -99,3 +99,14 @@ export function buildVideoDetailRequest(videoId) {
       fields: 'kind, items(contentDetails/duration,id,snippet(channelId,channelTitle,description,publishedAt,thumbnails/medium,title),statistics)'
     }, null);
 }
+
+export function buildRelatedVideosRequest(videoId, amountRelatedVideos = 12) {
+  return buildApiRequest('GET',
+    '/youtube/v3/search',
+    {
+      part: 'snippet',
+      type: 'video',
+      maxResults: amountRelatedVideos,
+      relatedToVideoId: videoId,
+    }, null);
+}

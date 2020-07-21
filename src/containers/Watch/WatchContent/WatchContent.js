@@ -7,26 +7,31 @@ import {Comments} from '../../Comments/Comments';
 import './WatchContent.scss';
 
 import {connect} from 'react-redux';
-import {getVideoById} from '../../../store/reducers/videos';
-
-function mapStateToProps(state, props) {
-    return {
-        video: getVideoById(state, props.videoId)
-    }
-}
+import {getRelatedVideos, getVideoById} from '../../../store/reducers/videos';
 
 export class WatchContent extends React.Component {
   render() {
+    if(!this.props.videoId) {
+        return <div/>
+    }
     return (
     	<div className='watch-grid'>
     		<Video className='video' id={this.props.videoId}/>
     		<VideoMetadata video={this.props.video}/>
     		<VideoInfoBox className='video-info-box' video={this.props.video}/>
+            <RelatedVideos className='related-videos' videos={this.props.relatedVideos}/>
             <Comments className='comments' amountComments={5}/>
-            <RelatedVideos className='relatedVideos'/>
     	</div>
     );
   }
+}
+
+
+function mapStateToProps(state, props) {
+    return {
+        relatedVideos: getRelatedVideos(state, props.videoId),
+        video: getVideoById(state, props.videoId)
+    }
 }
 
 export default connect(mapStateToProps, null)(WatchContent);
