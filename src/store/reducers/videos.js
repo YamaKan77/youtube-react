@@ -16,11 +16,11 @@ export default function videos(state = initialState, action) {
     case MOST_POPULAR[SUCCESS]:
       return reduceFetchMostPopularVideos(action.response, state);
     case VIDEO_CATEGORIES[SUCCESS]:
-    	return reduceFetchVideoCategories(action.response, state);
-		case MOST_POPULAR_BY_CATEGORY[SUCCESS]:	
-    	return reduceFetchMostPopularVideosByCategory(action.response, action.categories, state);
+      return reduceFetchVideoCategories(action.response, state);
+    case MOST_POPULAR_BY_CATEGORY[SUCCESS]:
+      return reduceFetchMostPopularVideosByCategory(action.response, action.categories, state);
     case WATCH_DETAILS[SUCCESS]:
-    	return reduceWatchDetails(action.response, state);
+      return reduceWatchDetails(action.response, state);
     case VIDEO_DETAILS[SUCCESS]:
       return reduceVideoDetails(action.response, state);
     default:
@@ -108,35 +108,39 @@ function groupVideosByIdAndCategory(response) {
 	return {byId, byCategory};
 }
 
-function reduceWatchDetails(responses, prevState) {
-	const videoDetailResponse = responses.find(r => r.result.kind === VIDEO_LIST_RESPONSE);
-	const video = videoDetailResponse.result.items[0];
-	const relatedEntry = reduceRelatedVideosRequest(responses);
 
-	return {
-		...prevState,
-		byId: {
-			...prevState.byId,
-			[video.id]: video
-		},
-		related: {
-			...prevState.related,
-			[video.id]: relatedEntry
-		}
-	};
+function reduceWatchDetails(responses, prevState) {
+  const videoDetailResponse = responses.find(r => r.result.kind === VIDEO_LIST_RESPONSE);
+  // we know that items will only have one element
+  // because we explicitly asked for a video with a specific id
+  const video = videoDetailResponse.result.items[0];
+  const relatedEntry = reduceRelatedVideosRequest(responses);
+
+  return {
+    ...prevState,
+    byId: {
+      ...prevState.byId,
+      [video.id]: video
+    },
+    related: {
+      ...prevState.related,
+      [video.id]: relatedEntry
+    }
+  };
 }
 
 function reduceRelatedVideosRequest(responses) {
   const relatedVideosResponse = responses.find(r => r.result.kind === SEARCH_LIST_RESPONSE);
   const {pageInfo, items, nextPageToken} = relatedVideosResponse.result;
-  const relatedVideoIds = items.map(video => video.id.videoId);
+  const relatedVideoIds = items.map(video => video.id);
 
-  return {
+  return  {
     totalResults: pageInfo.totalResults,
     nextPageToken,
     items: relatedVideoIds
   };
 }
+
 function reduceVideoDetails(responses, prevState) {
   const videoResponses = responses.filter(response => response.result.kind === VIDEO_LIST_RESPONSE);
   const parsedVideos = videoResponses.reduce((videoMap, response) => {
@@ -195,10 +199,9 @@ export const getVideoById = (state, videoId) => {
 };
 
 const getRelatedVideoIds = (state, videoId) => {
-	const related = state.videos.related[videoId];
-	return related ? related.items : [];
-}
-
+  const related = state.videos.related[videoId];
+  return related ? related.items : [];
+};
 export const getRelatedVideos = createSelector(
   getRelatedVideoIds,
   state => state.videos.byId,
@@ -208,4 +211,4 @@ export const getRelatedVideos = createSelector(
       return relatedVideoIds.map(videoId => videos[videoId]).filter(video => video);
     }
     return [];
-  });
+});
